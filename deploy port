@@ -1,0 +1,38 @@
+#ดาวน์โหลด nginx/Windows แล้วแตกไฟล์เป็น C:\nginx
+#เปิด C:\nginx\conf\nginx.conf แทนเนื้อหาด้วย:
+
+#1.แก้ไฟล์ nginx.conf
+events {}
+
+http {
+    server {
+        listen 8080;
+        proxy_set_header Host $host;
+
+        location /api/ {
+            proxy_pass http://127.0.0.1:3031;
+        }
+
+        location / {
+            proxy_pass http://127.0.0.1:3030;
+        }
+    }
+}
+
+#2. เปิด cmd สรางไฟล์ แล้วลองเปิด nginx
+cd /d C:\nginx
+nginx.exe -t
+#3 run
+start "" nginx.exe
+#4 reload
+nginx.exe -s reload
+
+# test serveo
+ssh -p 443 -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R my9park:80:127.0.0.1:8080 serveo.net
+
+#kill task
+cd /d C:\nginx
+taskkill /F /IM nginx.exe
+tasklist /FI "IMAGENAME eq nginx.exe"
+#run again
+start "" "C:\nginx\nginx.exe" -p C:/nginx/ -c conf/nginx.conf
